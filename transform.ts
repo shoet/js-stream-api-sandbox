@@ -18,24 +18,47 @@ const createTransoformStream = (allowdFields: string[]) => {
 };
 
 (async () => {
-  const input = JSON.stringify({
-    a: "1",
-    b: "2",
-    c: "3",
-    d: "4",
-  });
   const readable = new ReadableStream({
     start(controller) {
-      controller.enqueue(input);
+      controller.enqueue(
+        JSON.stringify({
+          a: "1",
+          b: "2",
+          c: "3",
+          d: "4",
+        }),
+      );
+      controller.enqueue(
+        JSON.stringify({
+          c: "6",
+          d: "4",
+        }),
+      );
       controller.close();
     },
   });
 
-  const transformer = createTransoformStream(["a", "c", "d"]);
-  const transformed = readable.pipeThrough(transformer);
+  const transformed = readable.pipeThrough(
+    new TransformStream<string, string>({
+      transform: (chunk, controller) => {
+        const allowedFields = ["a", "c", "d"];
+        const data: any = {};
+        const json = JSON.parse(chunk);
+        for (const f of allowedFields) {
+          data[f] = json[f];
+        }
+        controller.enqueue(JSON.stringify(data));
+      },
+    }),
+  );
 
   const reader = transformed.getReader();
 
-  const { done, value } = await reader.read();
-  console.log(value);
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+    console.log(value);
+  }
 })();

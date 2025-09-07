@@ -8,16 +8,15 @@ const createUpperFileWriter = () => {
       console.log("start");
     },
     write: async (chunk, controller) => {
-      fileWriter.write(chunk.toUpperCase());
-      // return new Promise((res, rej) => {
-      //   fileWriter.write(chunk.toUpperCase(), (error) => {
-      //     if (error) {
-      //       rej(error);
-      //     } else {
-      //       res();
-      //     }
-      //   });
-      // });
+      return new Promise((res, rej) => {
+        fileWriter.write(chunk.toUpperCase(), (error) => {
+          if (error) {
+            rej(error);
+          } else {
+            res();
+          }
+        });
+      });
     },
     close: () => {
       fileWriter.close();
