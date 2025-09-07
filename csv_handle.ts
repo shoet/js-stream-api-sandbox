@@ -11,6 +11,7 @@ function createCSVParse() {
     transform: (chunk, controller) => {
       buffer += chunk.toString();
       const lines = buffer.split("\n");
+      buffer = lines.pop() || ""; // 残りは次回使う
       for (const line of lines) {
         if (line.trim() === "") {
           continue;
@@ -31,7 +32,6 @@ function createCSVParse() {
           controller.enqueue(obj);
           obj = {};
         }
-        buffer = lines[1] as string;
       }
     },
   });
