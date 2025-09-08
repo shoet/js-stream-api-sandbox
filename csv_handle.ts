@@ -2,13 +2,14 @@ import * as fs from "node:fs";
 import { Readable } from "node:stream";
 import { TransformStream } from "node:stream/web";
 
-function createCSVParse() {
+export function createCSVParse() {
   let headers: string[] = [];
   let buffer = "";
   let obj: any = {};
 
   const transformer = new TransformStream({
     transform: (chunk, controller) => {
+      console.log("chunk", chunk);
       buffer += chunk.toString();
       const lines = buffer.split("\n");
       buffer = lines.pop() || ""; // 残りは次回使う
@@ -38,22 +39,22 @@ function createCSVParse() {
   return transformer;
 }
 
-const nodeStream = fs.createReadStream("input.csv", {
-  encoding: "utf-8",
-  highWaterMark: 1024,
-});
-const parser = createCSVParse();
-const reader = Readable.toWeb(nodeStream).pipeThrough(parser).getReader();
-
-try {
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    console.log(value);
-  }
-} catch (e) {
-  console.log("error", e);
-  reader.releaseLock();
-}
+// const nodeStream = fs.createReadStream("input.csv", {
+//   encoding: "utf-8",
+//   highWaterMark: 1024,
+// });
+// const parser = createCSVParse();
+// const reader = Readable.toWeb(nodeStream).pipeThrough(parser).getReader();
+//
+// try {
+//   while (true) {
+//     const { done, value } = await reader.read();
+//     if (done) {
+//       break;
+//     }
+//     console.log(value);
+//   }
+// } catch (e) {
+//   console.log("error", e);
+//   reader.releaseLock();
+// }
